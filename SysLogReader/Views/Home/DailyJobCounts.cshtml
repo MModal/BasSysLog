@@ -1,0 +1,54 @@
+﻿@model SysLogReader.Models.DailyJobModel
+
+@{
+    ViewBag.Title = "DailyJobCounts";
+}
+
+@section style{
+    <style type="text/css">
+        .content-wrapper{ max-width: none; }
+    </style>
+}
+
+@section script{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $('input[type="radio"]').change(function () {
+
+                $('form').submit();
+            });
+            $('select').change(function () {
+
+                $('form').submit();
+            });
+        });
+    </script>
+    
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script type="text/javascript">
+    google.load("visualization", "1", { packages: ["corechart"] });
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+
+
+        var data1 = google.visualization.arrayToDataTable(@Html.Raw(Model.data));
+
+        var options1 = {
+            title: 'Jobs Per Day'
+        };
+
+        var chart1 = new google.visualization.LineChart(document.getElementById('chart1'));
+        chart1.draw(data1, options1);
+    }
+
+</script>
+}
+<h2>DailyJobCounts</h2>
+
+@using (Html.BeginForm()){
+
+    @Html.DropDownListFor(m => m.SelectedMonth, new SelectList(Model.MonthList, "Date", "Display"))
+}
+<div id="chart1" style="width: 1600px; height: 700px;"></div>

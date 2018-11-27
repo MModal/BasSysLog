@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<sql>
+  <query id="GetLog">
+  <![CDATA[  
+    SELECT *
+    from (
+    select TS, MSG_TYPE, NUM, DESCRIPTION, SOURCE, PROCESSED, CLIENT, USERNAME, ID
+    from sphrsbilling.sys_log
+    order by TS desc
+    )
+    where rownum < :RECORD_COUNT
+  ]]>
+  </query>
+  <query id="GetLogRecord">
+    <![CDATA[  
+    select TS, MSG_TYPE, NUM, DESCRIPTION, SOURCE, PROCESSED, CLIENT, USERNAME, ID
+    from sphrsbilling.sys_log
+    where id = :id
+    order by TS desc
+  ]]>
+  </query>
+  <query id="GetLogByDesc">
+    <![CDATA[  
+    SELECT *
+    from (
+    select TS, MSG_TYPE, NUM, DESCRIPTION, SOURCE, PROCESSED, CLIENT, USERNAME, ID
+    from sphrsbilling.sys_log
+    where DESCRIPTION = :DESCRIPTION
+    order by TS desc
+    )
+    where rownum < :RECORD_COUNT
+  ]]>
+  </query>
+  <query id="GetLogFilter">
+    <![CDATA[  
+    SELECT *
+    from (
+    select TS, MSG_TYPE, NUM, DESCRIPTION, SOURCE, PROCESSED, CLIENT, USERNAME, ID
+    from sphrsbilling.sys_log
+    where MSG_TYPE = :MSG_TYPE
+    order by TS desc
+    )
+    where rownum < :RECORD_COUNT
+  ]]>
+  </query>
+  <query id="GetEntry">
+  <![CDATA[  
+    SELECT *
+    from sphrsbilling.sys_log
+    where ID = :ID
+  ]]>
+  </query>
+  <query id="MarkProcessed">
+    <![CDATA[  
+    update sphrsbilling.sys_log
+    set processed = sysdate
+    where ID = :ID
+  ]]>
+  </query>
+  <query id="GetBatchJobs">
+    <![CDATA[  
+    select NVL(ext_sys, '{NONE}') as EXT_SYS, batch_job_type, trunc(submitted_on) as Day, TRUNC((completed_on-submitted_on)*24*60,4) as Time
+from SPHRSBILLING.BATCH_JOB
+where submitted_on > ADD_MONTHS(sysdate, -1)
+order by ext_sys, batch_job_type, Day
+  ]]>
+  </query>
+  <query id="GetBatchJobTypes">
+    <![CDATA[  
+select NVL(ext_sys, '{NONE}') as EXT_SYS, j.batch_job_type, JT.DESCR, MIN(J.SUBMITTED_ON)
+from SPHRSBILLING.BATCH_JOB j
+left join sphrsbilling.batch_job_type jt on jt.batch_job_type = j.batch_job_type
+where submitted_on > ADD_MONTHS(sysdate, -1)
+GROUP by NVL(ext_sys, '{NONE}'), j.batch_job_type, JT.DESCR
+ORDER BY MIN(J.SUBMITTED_ON)
+  ]]>
+  </query>
+  <query id="GetBatchJobsByType">
+    <![CDATA[  
+    select NVL(ext_sys, '{NONE}') as EXT_SYS, batch_job_type, trunc(submitted_on) as Day, TRUNC((completed_on-submitted_on)*24*60,4) as Time
+from SPHRSBILLING.BATCH_JOB
+where submitted_on > ADD_MONTHS(sysdate, -1)
+and NVL(ext_sys, '{NONE}') = :EXT_SYS and batch_job_type = :BATCH_JOB_TYPE
+order by ext_sys, batch_job_type, Day
+  ]]>
+  </query>
+  <query id="GetWorkUnitCount">
+    <![CDATA[  
+select EXT_SYS, TO_CHAR(TAT_ENDS_ON, 'yyyy-mm-dd') as DAY, count(*) as COUNT
+from sphrsbilling.work_unit
+where TAT_ENDS_ON >= :MONTH_START
+  and TAT_ENDS_ON <  :MONTH_END
+group by EXT_SYS, TO_CHAR(TAT_ENDS_ON, 'yyyy-mm-dd')
+order by 2, 1
+  ]]>
+  </query>
+  <query id="GetSyncTimes">
+    <![CDATA[  
+select ROUND(nbr_sel/ ((completed_on-submitted_on)*24*60), 0) as "Jobs per min",
+ROUND(((completed_on-submitted_on)*24*60)/(timespan_lt-timespan_ge), 0) as "Minutes per day", 
+ROUND((completed_on-submitted_on)*24*60, 0) as "Run min" , (timespan_lt-timespan_ge) as "Days run",
+trunc(submitted_on) as "Date", b.*
+from sphrsbilling.batch_job b
+where batch_job_type = :batch_job_type
+  and submitted_on > add_months(trunc(sysdate), -6)
+order by batch_job_id
+  ]]>
+  </query>
+  <query id="GetSyncTimes2">
+    <![CDATA[  
+select 
+ROUND((completed_on-submitted_on)*24*60, 0) as "Run min" , trunc((timespan_lt-timespan_ge),4) as "Days run",
+trunc(submitted_on) as "Date", b.*
+from sphrsbilling.batch_job b
+where batch_job_type = :batch_job_type
+  and NVL(ext_sys, '{NONE}') = NVL(:ext_sys, '{NONE}')
+  and submitted_on > trunc(sysdate) - :days
+order by batch_job_id
+  ]]>
+  </query>
+</sql>

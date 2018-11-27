@@ -1,0 +1,68 @@
+﻿@model SysLogReader.Models.SyncModel
+
+@{
+    ViewBag.Title = "Sync Times";
+}
+
+@section style{
+    <style type="text/css">
+        .content-wrapper{ max-width: none; }
+    </style>
+}
+
+@section script{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $('input[type="radio"]').change(function () {
+
+                $('form').submit();
+            });
+            $('select').change(function () {
+
+                $('form').submit();
+            });
+        });
+    </script>
+    
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script type="text/javascript">
+    google.load("visualization", "1", { packages: ["corechart"] });
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+
+        var data1 = google.visualization.arrayToDataTable(@Html.Raw(Model.data));
+
+        var options1 = {
+            title: '@Model.BatchJobType'
+        };
+
+        var chart1 = new google.visualization.LineChart(document.getElementById('chart1'));
+        chart1.draw(data1, options1);  
+
+
+        var data2 = google.visualization.arrayToDataTable(@Html.Raw(Model.data2));
+
+        var options2 = {
+            title: '@Model.BatchJobType'
+        };
+
+        var chart2 = new google.visualization.LineChart(document.getElementById('chart2'));
+        chart2.draw(data2, options2);  
+    }
+
+</script>
+    
+
+}
+
+@using (Html.BeginForm()){
+
+    @Html.DropDownListFor(m => m.SelectedDayCount, new SelectList(Model.DayCountOptions))
+    @Html.DropDownListFor(m => m.BatchJobType, new SelectList(Model.BatchJobTypes))
+}
+
+<div id="chart1" style="width: 1600px; height: 200px;"></div>
+
+<div id="chart2" style="width: 1600px; height: 200px;"></div>

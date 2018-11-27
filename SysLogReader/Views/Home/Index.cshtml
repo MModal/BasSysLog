@@ -1,0 +1,184 @@
+﻿@using SysLogReader.Code
+@using SysLogReader.Models
+@model SysLogReader.Models.SysLogModel
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@section style{
+    <style type="text/css">
+        table td
+        {
+            cursor: pointer;
+            cursor: hand;
+        }
+        .detail td
+        {
+            background-color: #ddd; padding: 15px;
+        }
+        .detail span
+        {
+            float: right;
+            color: Blue;
+            text-decoration: underline;
+        }
+        .content-wrapper
+        {
+            max-width: none;
+        }
+        #busy
+        {
+            background-color: #aaa;
+            color: White;
+            font-weight: bold;
+            display: none;
+            position: fixed;
+            left: 25%;
+            top: 40%;
+            width: 50%;
+            padding: 15px;
+            text-align: center;
+        }
+        .proc {
+            color: #aaaaaa;
+        }
+        table tr:hover {
+            background-color: #e0ffff;
+        }
+    </style>
+    }
+@section script{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var trCaller;
+            $('table tr').click(function () {
+
+                trCaller = $(this);
+                ShowBusy();
+                $.ajax({
+                    url: '@Url.Content("~/Home/Entry")',
+                    type: 'POST',
+                    data: 'id=' + $(this).data('id') + '&prod=' + $('#db_prod').is(':checked'),
+                    success: function (result) {
+                        var item = $("#entryTemplate").clone().insertAfter(trCaller);
+                        $(item).find('div').html(result);
+                        $(item).show();
+                        HideBusy();
+                    },
+                    error: function (result) {
+                        $('#entry').html(result);
+                        HideBusy();
+                    }
+                });
+            });
+            $('.complete').click(function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                trCaller = $(this).closest('tr');
+                $.ajax({
+                    url: '@Url.Content("~/Home/Processed")',
+                    dataType: 'json',
+                    type: 'POST',
+                    data: 'id=' + trCaller.data('id'),
+                    success: function (result) {
+
+                        if (result.success) {
+                            $(trCaller).addClass('proc');
+                            $(trCaller).children().last().empty().append("<span>" + result.msg + "</span>");
+                        } else {
+                            alert(result.msg);
+                        }
+                    },
+                    error: function (result) {
+                        alert(result);
+                    }
+                });
+            });
+
+            $('.detail span').live('click', function () {
+                $(this).parent().parent().hide();
+            });
+
+            $('input[type="radio"]').change(function () {
+
+                $('form').submit();
+            });
+        });
+
+        function ShowBusy() {
+            $('#busy').show();
+        }
+
+        function HideBusy() {
+            $('#busy').hide();
+        }
+    </script>
+}
+<div>
+    @using (Html.BeginForm())
+    {
+        @Html.LabelFor(m => m.SelectedMsgType, "Type") @Html.DropDownListFor(m => m.SelectedMsgType, new SelectList(Model.MsgTypes, "Value", "Name"))
+        @Html.LabelFor(m => m.ID) @Html.TextBoxFor(m => m.ID)
+        @Html.LabelFor(m => m.Description) @Html.TextBoxFor(m => m.Description)
+        @Html.LabelFor(m => m.RecordCount, "Show records") @Html.TextBoxFor(m => m.RecordCount)
+        <input type="submit" value="Update" />
+    }
+</div>
+<table style="display: none;">
+    <tr id="entryTemplate" class="detail">
+        <td colspan="8"><span>Close</span><div></div></td>
+    </tr>
+</table>
+<div id="busy">
+    Loading...
+</div>
+@if (ViewBag.Error != null)
+{
+    <div>@ViewBag.Error</div>
+}
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Number</th>
+        <th>Event</th>
+        <th>Source</th>
+        <th>Client</th>
+        <th>User</th>
+        <th>Processed</th>
+    </tr>
+@if (Model.Entries != null)
+{
+    foreach (var x in Model.Entries)
+     {
+         var clas = "";
+         if (x.Processed != null)
+         {
+             clas = "proc";
+         }
+
+         <tr data-id="@x.ID" class="@clas">
+             <td>@x.TS</td>
+             <td>@x.MsgType</td>
+             <td>@x.Number</td>
+             <td>@x.Desc</td>
+             <td>@x.Source</td>
+             <td>@x.Client</td>
+             <td>@x.Username</td>
+             <td>
+                 @if (x.Processed != null)
+                 {
+                     @x.Processed
+                 }
+                 else
+                 {
+                     <a href="#" class="complete">Complete</a>
+                 }
+             </td>
+         </tr>
+     }
+}
+
+</table>

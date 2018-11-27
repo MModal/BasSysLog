@@ -1,0 +1,61 @@
+﻿@model SysLogReader.Models.OverallSyncTimeModel
+
+@{
+    ViewBag.Title = "Sync Times";
+}
+
+@section style{
+    <style type="text/css">
+        .content-wrapper{ max-width: none; }
+        .close { float: right;}
+    </style>
+}
+
+@section script{
+    
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script type="text/javascript">
+    google.load("visualization", "1", { packages: ["corechart"] });
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+
+        @{ int i = 1; }
+        @foreach (var rpt in Model.data)
+        {
+            <text>
+            var data@(i) = google.visualization.arrayToDataTable(@Html.Raw(rpt));
+
+            var options@(i) = {
+                title: '@Model.names[i-1]'
+            };
+
+            var chart@(i) = new google.visualization.LineChart(document.getElementById('chart@(i)'));
+            chart@(i).draw(data@(i), options@(i));  
+            </text>
+            i++;
+        }
+        
+
+    }
+
+    $(document).ready(function() {
+        $('.close').click(function() {
+            $(this).hide().next().hide();
+        });
+    });
+</script>
+    
+
+}
+
+<div>No Data For: @ViewBag.NoData</div>
+
+@{ int j = 1; }
+@foreach (var rpt in Model.data)
+{  
+    <a href="#" class="close">X</a>
+    <div id="chart@(j)" style="width: 1600px; height: 200px;"></div>
+    j++;
+}
+

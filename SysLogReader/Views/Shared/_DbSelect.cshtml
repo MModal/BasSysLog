@@ -1,0 +1,9 @@
+﻿@model SysLogReader.Models.DbSelectModel
+<div>
+@using (Html.BeginForm("DbSelect", "Home", FormMethod.Post))
+{
+    @Html.DropDownListFor(m => m.Selected, new SelectList(Model.Databases, "Connection", "DbName"))
+    
+    <input type="submit" value="Go" style="background-color: transparent; border: none;" />
+}
+</div>

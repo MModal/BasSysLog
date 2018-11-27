@@ -1,0 +1,64 @@
+﻿@model SysLogReader.Models.BatchJobModel
+
+@{
+    ViewBag.Title = "JobTimes";
+}
+
+@section style{
+    <style type="text/css">
+        .content-wrapper{ max-width: none; }
+    </style>
+}
+
+@section script{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $('input[type="radio"]').change(function () {
+
+                $('form').submit();
+            });
+        });
+    </script>
+    
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script type="text/javascript">
+    google.load("visualization", "1", { packages: ["corechart"] });
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+
+        @{
+            int cnt = 0;
+        } 
+        @foreach (var jobTyp in Model.JobTypes)
+        {
+            <text>
+            var data@(cnt) = google.visualization.arrayToDataTable(@Html.Raw(jobTyp.data));
+            //var data1 = google.visualization.arrayToDataTable(@Html.Raw(@ViewBag.CommCountData));
+
+            var options@(cnt) = {
+                title: '@jobTyp.JobTypeName', legend: 'none'
+            };
+
+            var chart@(cnt) = new google.visualization.LineChart(document.getElementById('chart@(cnt)'));
+            chart@(cnt).draw(data@(cnt), options@(cnt));  
+            </text>
+            cnt++;
+        }
+
+    }
+
+</script>
+    
+
+}
+
+@{
+    int x = 0;
+} 
+@foreach (var jobTyp in Model.JobTypes)
+{
+    <div id="chart@(x)" style="width: 1600px; height: 200px;"></div>
+    x++;
+}

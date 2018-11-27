@@ -1,0 +1,58 @@
+﻿@using SysLogReader
+@using SysLogReader.Models
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>@ViewBag.Title - My ASP.NET MVC Application</title>
+        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+        <meta name="viewport" content="width=device-width" />
+        @Styles.Render("~/Content/css")
+        @Scripts.Render("~/bundles/modernizr")
+        <script src="@Url.Content("~/Scripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
+        @RenderSection("style", false)
+        @RenderSection("script", false)
+        @if (SessionHelper.SelectedDatabase == "SBTEST")
+        {
+            @Styles.Render("~/Content/test.css")
+        }
+    </head>
+    <body>
+        <header>
+            <div class="content-wrapper">
+                <div class="float-left">
+                    <p class="site-title"></p>
+                    @Html.Partial("_DbSelect", new DbSelectModel(SessionHelper.SelectedDatabase))
+                </div>
+                <div class="float-right">
+                    <nav>
+                        <ul id="menu">
+                            <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                            <li>@Html.ActionLink("Job Times", "JobTimes", "Home")</li>
+                            <li>@Html.ActionLink("Daily Job Sync Count", "DailyJobCounts", "Home")</li>
+                            <li>@Html.ActionLink("Sync Time", "SyncTimes", "Home")</li>
+                            <li>@Html.ActionLink("Overall Sync Time", "OverallSyncTimes", "Home")</li>
+                        </ul>
+                    </nav>
+                </div>
+                <br/>
+            </div>
+        </header>
+        <div id="body">
+            @RenderSection("featured", required: false)
+            <section class="content-wrapper main-content clear-fix">
+                @RenderBody()
+            </section>
+        </div>
+        <footer>
+            <div class="content-wrapper">
+                <div class="float-left">
+                    <p>&copy; @DateTime.Now.Year - My ASP.NET MVC Application</p>
+                </div>
+            </div>
+        </footer>
+
+        @Scripts.Render("~/bundles/jquery")
+        @RenderSection("scripts", required: false)
+    </body>
+</html>

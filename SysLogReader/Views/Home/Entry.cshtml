@@ -1,0 +1,11 @@
+﻿@model SysLogReader.Code.dtoLogEntry
+
+@{
+    Layout = null;
+}
+
+<div>
+    @Html.Raw(Server.HtmlEncode(Model.ErrorData.Trim()).Replace(Environment.NewLine, "<br>"))
+    <hr/>
+    @Html.Raw(Server.HtmlEncode(Model.SessionData.Trim()).Replace(Environment.NewLine, "<br>"))
+</div>
